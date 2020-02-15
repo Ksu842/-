@@ -1,0 +1,64 @@
+
+import requests
+from bs4 import BeautifulSoup
+from tkinter import*
+
+root=Tk()
+root.geometry('800x600')
+
+canvas = Canvas(root,width=700,height=350)
+canvas.pack()
+canvas.configure(background="white")
+canvas.place(x=50,y=200)
+
+silkar = []
+nomer = input("Введите номер задачи: ")
+silka = requests.get('https://gdz.ru/class-6/matematika/dorofeev-sharygin/'+ nomer + '-nom/')
+
+soup = BeautifulSoup(silka.content, "html.parser")
+images = soup.findAll('img')
+
+for i in images:
+    if "tasks" in i.get('src'):
+        silkar.append(i.get('src'))
+
+lbl_nom = Label(root, text="Введите номер задачи")
+txt = Entry(root, width=40)
+lbl_nom.pack()
+txt.pack()
+
+btn_1 = Button(root, text="Показать ответ")
+btn_1.configure(background="light gray")
+btn_1.pack()
+btn_1.place(x=350,y=50)
+btn_1.bind("<Button-1>")
+
+var=IntVar()
+var.set(0)
+r_1=Radiobutton(text="Математика",variable=var,value=0)
+r_1.pack()
+r_1.configure(background="light gray")
+r_1.place(x=50,y=40)
+
+r_2=Radiobutton(text="Русский язык",variable=var,value=1)
+r_2.pack()
+r_2.configure(background="light gray")
+r_2.place(x=50,y=65)
+
+r_3=Radiobutton(text="Обществознание",variable=var,value=2)
+r_3.pack()
+r_3.configure(background="light gray")
+r_3.place(x=50,y=90)
+
+btn_1 = Button(root, text=">")
+btn_1.configure(background="light gray")
+btn_1.pack()
+btn_1.place(x=730,y=170)
+#btn_1.bind("<Button-1>",color_green)
+
+btn_2 = Button(root, text="<")
+btn_2.configure(background="light gray")
+btn_2.pack()
+btn_2.place(x=700,y=170)
+#btn_2.bind("<Button-1>",color_red)
+
