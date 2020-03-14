@@ -1,0 +1,200 @@
+import requests
+from bs4 import BeautifulSoup
+from tkinter import*
+from tkinter import messagebox as mb
+from PIL import Image, ImageTk, ImageDraw
+from io import BytesIO
+import socket
+
+silkar = []
+j = 0
+
+
+def cartinci(event):
+    global silkar
+    silkar = []
+    if var.get()== 0:
+        s = message.get()
+       
+        if not s.isdigit():
+            mb.showerror("Ошибка", "Должно быть введено число")
+        elif not  1 <= int(s) <= 1058:
+            mb.showerror("Ошибка", "Число должно быть в промежутке между 1 и 1058 номерами")
+        else:
+            silka = requests.get('https://gdz.ru/class-6/matematika/dorofeev-sharygin/'+ s + '-nom/')
+    elif var.get()== 1:
+          silka = requests.get('https://gdz.ru/class-6/russkii_yazik/baranov-2008/'+ str(message.get()) + '-nom/')
+    elif var.get()== 2:
+          silka = requests.get('https://gdz.ru/class-6/obshhestvoznanie/reshebnik-rabochaya-tetrad-ivanova/' + str(messageP.get()) + '-item-' + str(message.get()) + '/')
+    soup = BeautifulSoup(silka.content, "html.parser")
+    images = soup.findAll('img')
+
+    for i in images:
+          if "tasks" in i.get('src'):
+               silkar.append(i.get('src'))
+    
+    coxranenie()
+
+def coxranenie():
+     global silkar
+     global j
+     global message
+     try:
+          photo = requests.get("http:" + str(silkar[j]))
+          print(photo)
+          img = Image.open(BytesIO(photo.content))
+          canvas.image = ImageTk.PhotoImage(img)
+          canvas.create_image(720,480, image = canvas.image, anchor = SE)
+          knopki()
+     except:
+          s = message.get()
+          if s.isdigit() == False:
+               mb.showerror("Ошибка", "Должно быть введено число")
+          else:
+               if int(s)>1058:
+                    print("Что-то") 
+                    mb.showerror("Ошибка", "Число должно быть в промежутке между 1 и 1058 номерами")
+      
+
+     
+def vis_scale():
+     if var.get() == 2:
+          lbl_nom_2.place(x = 350, y = 40)
+          txt_2.place(x = 267, y = 75)
+          w.place(x = 550, y = 70)
+          w1.place(x = 550, y = 20)
+          button.place(x = 610, y = 70)
+     else:
+          lbl_nom_2.place_forget()
+          txt_2.place_forget()
+          w.place_forget()
+          w1.place_forget()
+          button.place_forget()
+
+def next_f(event):
+    global j 
+    j+=1
+    coxranenie()
+
+def next_m(event):
+    global j 
+    j-=1
+    coxranenie()
+
+def knopki():
+     global j
+     if j == 0:
+        btn_2.configure(state="disabled")
+     else:
+        btn_2.configure(state="normal")
+        
+     if j >= len(silkar)-1:
+        btn_1.configure(state="disabled")
+     else:
+        btn_1.configure(state="normal")
+
+root=Tk()
+root.geometry('800x700')
+root.configure(background="light gray")
+
+canvas = Canvas(root,width=700,height=480)
+canvas.pack()
+canvas.configure(background="white")
+canvas.place(x=50,y=160)
+
+btn_1 = Button(root, text="Показать ответ")
+btn_1.configure(background="light gray")
+btn_1.pack()
+btn_1.place(x=350,y=90)
+btn_1.bind("<Button-1>", cartinci)
+
+message = StringVar()
+messageP = StringVar()
+
+lbl_nom = Label(root, text="Введите номер задачи")
+lbl_nom.configure(background="light gray")
+txt = Entry(root, width=40,textvariable=message)
+lbl_nom.pack()
+txt.pack()
+
+lbl_nom_2 = Label(root, text="Введите номер параграфа")
+lbl_nom_2.configure(background="light gray")
+txt_2 = Entry(root, width=40,textvariable=messageP)
+lbl_nom_2.pack()
+txt_2.pack()
+lbl_nom_2.place(x = 350, y = 40)
+txt_2.place(x = 267, y = 75)
+lbl_nom_2.place_forget()
+txt_2.place_forget()
+
+OPTIONS = ["1","2","3","4","5","6","7","8"] #etc
+
+
+variable = StringVar(root)
+variable.set(OPTIONS[0]) # default value
+
+w = OptionMenu(root, variable, *OPTIONS)
+w.pack()
+w.place(x = 550, y = 70)
+w.place_forget()
+
+def ok():
+    print ("value is:" + variable.get())
+    print ("value is:" + variable1.get())
+    global Options
+#    Options.clear
+    i=1
+#   response = requests.get('https://gdz.ru/class-6/obshhestvoznanie/reshebnik-rabochaya-tetrad-ivanova/'+variable1.get()  + '-item-' + str(i) + '/')
+ #  if response:
+  #       OPTIONS.[i-1]=i
+   #else 
+    
+
+button = Button(root, text="OK", command=ok)
+button.pack()
+button.place(x = 610, y = 70)
+button.place_forget()
+
+OPTIONS1 = ["Повторяем из курса 5 класса", "1", "2", "3", "4", "§5", "§6", "§7", "§8", "§9", "§10", "§11", "§12", "Задания для повторения"] #etc
+
+variable1 = StringVar(root)
+variable1.set(OPTIONS1[0]) # default value
+
+w1 = OptionMenu(root, variable1, *OPTIONS1)
+w1.pack()
+w1.place(x = 550, y = 20)
+w1.place_forget()
+
+scroll_y = Scrollbar(root, orient="vertical", command=canvas.yview)
+scroll_y.pack(side='right', fill='y')
+
+var=IntVar()
+var.set(0)
+r_1=Radiobutton(text="Математика",variable=var,value=0 , command = vis_scale)
+r_1.pack()
+r_1.configure(background="light gray")
+r_1.place(x=50,y=40)
+
+r_2=Radiobutton(text="Русский язык",variable=var,value=1 , command = vis_scale)
+r_2.pack()
+r_2.configure(background="light gray")
+r_2.place(x=50,y=65)
+
+r_3=Radiobutton(text="Обществознание",variable=var,value=2 , command = vis_scale)
+r_3.pack()
+r_3.configure(background="light gray")
+r_3.place(x=50,y=90)
+
+btn_1 = Button(root, text=">")
+btn_1.configure(background="light gray")
+btn_1.pack()
+btn_1.place(x=730,y=120)
+btn_1.bind("<Button-1>", next_f)
+
+btn_2 = Button(root, text="<")
+btn_2.configure(background="light gray")
+btn_2.pack()
+btn_2.place(x=700,y=120)
+btn_2.bind("<Button-1>", next_m)
+
+root.mainloop()
